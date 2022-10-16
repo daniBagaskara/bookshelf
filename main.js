@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let form = document.getElementById("inputBook");
   let checkBox = document.getElementById("inputBookIsComplete");
   let incompleteBookshelfList = document.getElementById("incompleteBookshelfList");
+  let completeBookshelfList = document.getElementById("completeBookshelfList");
 
   let data_exist = getLocalStorage();
   if (data_exist.length !== 0) {
@@ -33,6 +34,10 @@ document.addEventListener("DOMContentLoaded", function () {
     books.push(book);
 
     setLocalStorage(books);
+    form.reset();
+    incompleteBookshelfList.innerHTML = "";
+    completeBookshelfList.innerHTML = "";
+    loadDataStorage();
   }
 
   function isChecked(e) {
@@ -47,13 +52,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Reusable function
   function getLocalStorage() {
-    let books = [];
-    let book = JSON.parse(localStorage.getItem("data_book"));
-
-    if (book) {
-      books.push(book);
+    let books = JSON.parse(localStorage.getItem("data_book"));
+    if (books) {
+      return books;
+    } else {
+      return (books = []);
     }
-    return books;
   }
 
   function setLocalStorage(book) {
@@ -63,10 +67,78 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function loadDataStorage() {
     let books = getLocalStorage();
+    let Complete = "";
     let inComplete = "";
-    console.log(books);
+
+    /**
+     * Create List Element
+     */
+
     books.forEach((book) => {
-      console.log(book[0].isComplete);
+      console.log(book);
+      // create article
+      let article = document.createElement("article");
+      article.classList.add("book_item");
+
+      // create h3 and p
+      let title = document.createElement("h3");
+      let author = document.createElement("p");
+      let year = document.createElement("p");
+
+      // Create action
+      let action = document.createElement("div");
+      action.classList.add("action");
+
+      let buttonHapus = document.createElement("button");
+      buttonHapus.classList.add("red");
+
+      let textHapus = document.createTextNode("Hapus");
+      buttonHapus.appendChild(textHapus);
+
+      // if true
+      if (book.isComplete) {
+        let titleText = document.createTextNode(book.title);
+        title.appendChild(titleText);
+
+        let authorText = document.createTextNode("Penulis : " + book.author);
+        author.appendChild(authorText);
+
+        let yeartext = document.createTextNode("Tahun : " + book.year);
+        year.appendChild(yeartext);
+
+        let buttonInComplete = document.createElement("button");
+        buttonInComplete.classList.add("green");
+
+        let textInComplete = document.createTextNode("Belum Selesai diBaca");
+        buttonInComplete.appendChild(textInComplete);
+
+        action.append(buttonInComplete, buttonHapus);
+
+        article.append(title, author, year, action);
+
+        completeBookshelfList.appendChild(article);
+      } else {
+        let titleText = document.createTextNode(book.title);
+        title.appendChild(titleText);
+
+        let authorText = document.createTextNode("Penulis : " + book.author);
+        author.appendChild(authorText);
+
+        let yeartext = document.createTextNode("Tahun : " + book.year);
+        year.appendChild(yeartext);
+
+        let buttonComplete = document.createElement("button");
+        buttonComplete.classList.add("green");
+
+        let textInComplete = document.createTextNode("Selesai diBaca");
+        buttonComplete.appendChild(textInComplete);
+
+        action.append(buttonComplete, buttonHapus);
+
+        article.append(title, author, year, action);
+
+        incompleteBookshelfList.appendChild(article);
+      }
     });
   }
 });
