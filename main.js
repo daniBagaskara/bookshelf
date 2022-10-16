@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let checkBox = document.getElementById("inputBookIsComplete");
   let incompleteBookshelfList = document.getElementById("incompleteBookshelfList");
   let completeBookshelfList = document.getElementById("completeBookshelfList");
+  let deleteBookButton = document.getElementsByClassName("btn_remove_book");
 
   let data_exist = getLocalStorage();
   if (data_exist.length !== 0) {
@@ -11,6 +12,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   form.addEventListener("submit", insertBook);
   checkBox.addEventListener("change", isChecked);
+  Array.from(deleteBookButton).forEach(function (btn_del) {
+    btn_del.addEventListener("click", deleteBook);
+  });
 
   /** ----------------------------------------------------------------- */
   function insertBook(e) {
@@ -40,6 +44,13 @@ document.addEventListener("DOMContentLoaded", function () {
     loadDataStorage();
   }
 
+  function deleteBook() {
+    id = this.getAttribute("data-id");
+    if (confirm("confirm to Delete?")) {
+      deleteBookLocalStorage(id);
+    }
+  }
+
   function isChecked(e) {
     let span = document.getElementById("bookSubmit").children[0];
 
@@ -49,6 +60,9 @@ document.addEventListener("DOMContentLoaded", function () {
       span.innerText = "Belum selesai dibaca";
     }
   }
+
+  /** ----------------------------------------------------------------------
+   */
 
   // Reusable function
   function getLocalStorage() {
@@ -60,8 +74,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function setLocalStorage(book) {
-    const myJson = JSON.stringify(book);
+  function setLocalStorage(books) {
+    const myJson = JSON.stringify(books);
     localStorage.setItem("data_book", myJson);
   }
 
@@ -69,13 +83,14 @@ document.addEventListener("DOMContentLoaded", function () {
     let books = getLocalStorage();
     let Complete = "";
     let inComplete = "";
+    incompleteBookshelfList.innerHTML = "";
+    completeBookshelfList.innerHTML = "";
 
     /**
      * Create List Element
      */
 
     books.forEach((book) => {
-      console.log(book);
       // create article
       let article = document.createElement("article");
       article.classList.add("book_item");
@@ -90,7 +105,8 @@ document.addEventListener("DOMContentLoaded", function () {
       action.classList.add("action");
 
       let buttonHapus = document.createElement("button");
-      buttonHapus.classList.add("red");
+      buttonHapus.classList.add("red", "btn_remove_book");
+      buttonHapus.setAttribute("data-id", book.id);
 
       let textHapus = document.createTextNode("Hapus");
       buttonHapus.appendChild(textHapus);
@@ -107,7 +123,8 @@ document.addEventListener("DOMContentLoaded", function () {
         year.appendChild(yeartext);
 
         let buttonInComplete = document.createElement("button");
-        buttonInComplete.classList.add("green");
+        buttonInComplete.classList.add("green", "btn_InComplete");
+        buttonInComplete.setAttribute("data-id", book.id);
 
         let textInComplete = document.createTextNode("Belum Selesai diBaca");
         buttonInComplete.appendChild(textInComplete);
@@ -128,7 +145,8 @@ document.addEventListener("DOMContentLoaded", function () {
         year.appendChild(yeartext);
 
         let buttonComplete = document.createElement("button");
-        buttonComplete.classList.add("green");
+        buttonComplete.classList.add("green", "btn_Complete");
+        buttonComplete.setAttribute("data-id", book.id);
 
         let textInComplete = document.createTextNode("Selesai diBaca");
         buttonComplete.appendChild(textInComplete);
@@ -140,5 +158,19 @@ document.addEventListener("DOMContentLoaded", function () {
         incompleteBookshelfList.appendChild(article);
       }
     });
+  }
+
+  function deleteBookLocalStorage(id) {
+    let books = getLocalStorage();
+
+    books.forEach((book, index) => {
+      if (book.id == id) {
+        books.splice(index, 1);
+      }
+    });
+
+    alert("deleted");
+    setLocalStorage(books);
+    loadDataStorage();
   }
 });
