@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", function () {
   let incompleteBookshelfList = document.getElementById("incompleteBookshelfList");
   let completeBookshelfList = document.getElementById("completeBookshelfList");
   let deleteBookButton = document.getElementsByClassName("btn_remove_book");
+  let completeButton = document.getElementsByClassName("btn_Complete");
+  let InCompleteButton = document.getElementsByClassName("btn_InComplete");
+  let filter_book = document.getElementById("searchBookTitle");
 
   let data_exist = getLocalStorage();
   if (data_exist.length !== 0) {
@@ -12,8 +15,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   form.addEventListener("submit", insertBook);
   checkBox.addEventListener("change", isChecked);
-  Array.from(deleteBookButton).forEach(function (btn_del) {
-    btn_del.addEventListener("click", deleteBook);
+  filter_book.addEventListener("keyup", filterBook);
+  Array.from(deleteBookButton).forEach(function (btn_remove) {
+    btn_remove.addEventListener("click", deleteBook);
+  });
+  Array.from(completeButton).forEach(function (btn_selesai) {
+    btn_selesai.addEventListener("click", moveBookToCompleteShelf);
+  });
+  Array.from(InCompleteButton).forEach(function (btn_belum_selsai) {
+    btn_belum_selsai.addEventListener("click", moveBookToInCompleteShelf);
   });
 
   /** ----------------------------------------------------------------- */
@@ -42,12 +52,27 @@ document.addEventListener("DOMContentLoaded", function () {
     incompleteBookshelfList.innerHTML = "";
     completeBookshelfList.innerHTML = "";
     loadDataStorage();
+    alert("Success Insert Book");
   }
 
   function deleteBook() {
     id = this.getAttribute("data-id");
     if (confirm("confirm to Delete?")) {
       deleteBookLocalStorage(id);
+    }
+  }
+
+  function moveBookToCompleteShelf() {
+    id = this.getAttribute("data-id");
+    if (confirm("Move Book to Complete Shelf?")) {
+      moveBook(id);
+    }
+  }
+
+  function moveBookToInCompleteShelf() {
+    id = this.getAttribute("data-id");
+    if (confirm("Move Book to InComplete Shelf?")) {
+      moveBook(id);
     }
   }
 
@@ -85,10 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let inComplete = "";
     incompleteBookshelfList.innerHTML = "";
     completeBookshelfList.innerHTML = "";
-
-    /**
-     * Create List Element
-     */
 
     books.forEach((book) => {
       // create article
@@ -169,8 +190,46 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    alert("deleted");
+    alert("Book Deleted");
     setLocalStorage(books);
     loadDataStorage();
+    location.reload();
+  }
+
+  function moveBook(id) {
+    let books = getLocalStorage();
+    let text = "";
+
+    books.forEach((book, index) => {
+      if (book.id == id) {
+        if (book.isComplete) {
+          book.isComplete = false;
+          text = "InComplete Shelf";
+        } else {
+          book.isComplete = true;
+          text = "Complete Shelf";
+        }
+      }
+    });
+
+    alert("Book Moved to " + text);
+    setLocalStorage(books);
+    loadDataStorage();
+    location.reload();
+  }
+
+  function filterBook() {
+    let books = document.getElementsByClassName("book_item");
+    let text_filter = document.getElementById("searchBookTitle").value;
+
+    Array.from(books).forEach(function (book) {
+      const title = book.firstChild.textContent.toLowerCase();
+
+      if (title.indexOf(text_filter) !== -1) {
+        book.setAttribute("style", "display : block;");
+      } else {
+        book.setAttribute("style", "display : none !important;");
+      }
+    });
   }
 });
